@@ -1,64 +1,264 @@
+<!-- 
+
+    Use any of this however you want. (background images are not mine)
+    Pretty messy right now though... will clean it up later. 
+
+ -->
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
-
     <style>
-        textarea { 
-            color: grey;
+        body {
+            background-color: #151515;
+            color: #FFF8E7;
+            margin: 0px;
+            overflow-x: hidden;
+        }
+        .background {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+        #fs-static {
+            background: url('https://media.fromsoftware.jp/fromsoftware/ww/static/img/top/wide/mask_noize.gif') repeat center center #1d1d1d;
+            opacity: 0.8;
+            z-index: -100;
+        }
+        #embers-bg {
+            background: url('https://i.pinimg.com/originals/25/48/bf/2548bf6970f74d0d9594e17b72bc2037.gif') no-repeat center bottom black;
+            opacity: 0.5;
+            z-index: -101;
+        }
+        #sphere-bg {
+            background: url('https://66.media.tumblr.com/064894d0fd69e90e2d93e8a616545504/tumblr_oynmnxWa0r1qbgdnxo1_540.gif') no-repeat center center black;
+            opacity: 1;
+            z-index: -102;
+            background-size: 1080px 1080px;
+        }
+        #main-textarea {
+            outline: none;
+            border: none;
             resize: none;
+            background-color: rgba(0,0,0,0.3);
+            color: #FFF8E7;
+            border-bottom: 1px solid #ff6e0e;
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            padding: 0.5em;
+        }
+        ::-moz-selection {
+            background-color: #ff6e0edc;
+        }
+        ::selection {
+            background-color: #ff6e0edc;
+        }
+        .main-textarea-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 33%;
+            max-width: 720px;
+            min-height: 250px;
+            padding: 1em;
+            transform: translate(-50%,-50%);
+        }
+        .noselect {
+            user-select: none;
         }
 
-        #title {
-            font-weight: bold; 
-            font-size: 18px;
+        .button-container {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            width: 100%;
+            max-width: 250px;
+            display: flex;
+            flex-direction: row;
+            align-content: center;
         }
+        .main-button {
+            flex: 0.5 100%;
+            position: relative;
+            padding: 0.75em 1em;
+            margin: 0px 0.5em 0px 0.5em;
+            font-size: 14px;
+
+            color: #ff6e0e;
+            background-color: rgba(0,0,0,0.3);
+            border: 1px solid #ff6e0e;
+            border-radius: 2px;
+        }
+        .hidden {
+            display:none;
+        }
+        .header {
+            position: absolute; 
+            width: 100%;
+            text-align: center;
+            padding-top: 3em;
+            font-size: 20px;
+        }
+        .header2 {
+            font-size: 14px;
+        }
+        .status {
+            overflow: hidden;
+        }
+        .footer {
+            position: absolute; 
+            width: 100%;
+            text-align: center;
+            margin-bottom: 1em;
+            bottom: 0px;
+            color: rgba(255, 248, 231, 0.5);
+        }
+        a:link, a:visited, a:active { color: #ff6e0e; }
+        a:hover { color: grey; }
     </style>
+    <script>
+        $(function(){
+            let main_status = "NONE"; // "READY", "FINISHED"
+            let button_load = $("#button-load");
+            let button_clear = $("#button-clear");
+            let button_unlock = $("#button-unlock");
+            let button_copy = $("#button-copy");
+            let button_save = $("#button-save");
+            let main_textarea = $("#main-textarea");
+            let save_anchor = $("#saveanchor");
+
+            function hide_element(e) {
+                if (!e.hasClass("hidden")) {
+                    e.addClass("hidden");
+                }
+            }
+
+            function show_element(e) {
+                if (e.hasClass("hidden")) {
+                    e.removeClass("hidden");
+                }
+            }
+
+            function change_status(status) {
+                if (status == "NONE") {
+                    show_element(button_load);
+                    hide_element(button_clear);
+                    hide_element(button_unlock);
+                    hide_element(button_copy);
+                    hide_element(button_save);
+                } else if (status == "READY") {
+                    hide_element(button_load);
+                    show_element(button_clear);
+                    show_element(button_unlock);
+                    hide_element(button_copy);
+                    hide_element(button_save);
+                } else if (status == "FINISHED") {
+                    hide_element(button_load);
+                    show_element(button_clear);
+                    hide_element(button_unlock);
+                    show_element(button_copy);
+                    show_element(button_save);
+                }
+            }
+
+            main_textarea.on("change keyup paste", function(){
+                let text = $(this).val(); 
+                if (text.search("<UserProfile>") == -1) {
+                    change_status("NONE");
+                } else {
+                    change_status("READY");
+                }
+            });
+
+
+            button_clear.on("click", function(){
+                main_textarea.val("");
+                main_textarea.change();
+                change_status("NONE");
+            });
+
+            button_copy.on("click", function() {
+                main_textarea.select();
+                document.execCommand("copy");
+            });
+
+            let input_upload = $("#input-upload");
+            button_load.on("click", function(){
+                input_upload.click();
+            });
+
+            input_upload.change(function(){
+                console.log("file given");
+                let file = input_upload.prop("files")[0];
+
+                if (file.type.match(/text.*/)) {
+                    let reader = new FileReader();
+                    reader.onload = function(e) {
+                        main_textarea.val(reader.result);
+                        main_textarea.change();
+                    }
+                    reader.readAsText(file);  
+                }
+            });
+
+            button_unlock.on("click", function(){
+                let xml = $($.parseXML(main_textarea.val()));
+                let stats = xml.find("stats");
+                let unlocks = xml.find("unlock");
+                unlocks.each(function(){ $(this).remove(); });
+
+                xml.find("achievementsList").text("AttackSpeed BurnToDeath CarryLunarItems ChargeTeleporterWhileNearDeath CommandoClearGameMonsoon CommandoKillOverloadingWorm CommandoNonLunarEndurance Complete20Stages Complete30StagesCareer CompleteMultiBossShrine CompletePrismaticTrial CompleteTeleporter CompleteTeleporterWithoutInjury CompleteThreeStages CompleteThreeStagesWithoutHealing CompleteUnknownEnding DefeatSuperRoboBallBoss Die5Times Discover10UniqueTier1 Discover5Equipment EngiArmy EngiKillBossQuick FailShrineChance FindDevilAltar FindTimedChest FindUniqueNewtStatues FreeMage HardEliteBossKill HardHitter HuntressClearGameMonsoon HuntressCollectCrowbars HuntressMaintainFullHealthOnFrozenWall KillBossQuantityInRun KillBossQuick KillElementalLemurians KillEliteMonster KillElitesMilestone KillGoldTitanInOneCycle KillTotalEnemies LoaderClearGameMonsoon LoaderSpeedRun LogCollector LoopOnce MageAirborneMultiKill MageClearGameMonsoon MageFastBoss MageMultiKill MajorMultikill MaxHealingShrine MercClearGameMonsoon MercCompleteTrialWithFullHealth MercDontTouchGround MoveSpeed MultiCombatShrine RepeatFirstTeleporter RepeatedlyDuplicateItems RescueTreebot StayAlive1 SuicideHermitCrabs ToolbotClearGameMonsoon ToolbotGuardTeleporter ToolbotKillImpBossWithBfg TotalDronesRepaired TotalMoneyCollected TreebotClearGameMonsoon TreebotDunkClayBoss TreebotLowHealthTeleporter UseThreePortals");
+                xml.find("discoveredPickups").text("ItemIndex.Syringe ItemIndex.Bear ItemIndex.Behemoth ItemIndex.Missile ItemIndex.ExplodeOnDeath ItemIndex.Dagger ItemIndex.Tooth ItemIndex.CritGlasses ItemIndex.Hoof ItemIndex.Feather ItemIndex.ChainLightning ItemIndex.Seed ItemIndex.Icicle ItemIndex.GhostOnKill ItemIndex.Mushroom ItemIndex.Crowbar ItemIndex.AttackSpeedOnCrit ItemIndex.BleedOnHit ItemIndex.SprintOutOfCombat ItemIndex.FallBoots ItemIndex.WardOnLevel ItemIndex.Phasing ItemIndex.HealOnCrit ItemIndex.HealWhileSafe ItemIndex.PersonalShield ItemIndex.EquipmentMagazine ItemIndex.NovaOnHeal ItemIndex.ShockNearby ItemIndex.Infusion ItemIndex.Clover ItemIndex.Medkit ItemIndex.Bandolier ItemIndex.BounceNearby ItemIndex.IgniteOnKill ItemIndex.StunChanceOnHit ItemIndex.Firework ItemIndex.LunarDagger ItemIndex.GoldOnHit ItemIndex.WarCryOnMultiKill ItemIndex.ShieldOnly ItemIndex.AlienHead ItemIndex.Talisman ItemIndex.Knurl ItemIndex.BeetleGland ItemIndex.SprintBonus ItemIndex.SecondarySkillMagazine ItemIndex.StickyBomb ItemIndex.TreasureCache ItemIndex.BossDamageBonus ItemIndex.SprintArmor ItemIndex.IceRing ItemIndex.FireRing ItemIndex.SlowOnHit ItemIndex.ExtraLife ItemIndex.UtilitySkillMagazine ItemIndex.HeadHunter ItemIndex.KillEliteFrenzy ItemIndex.RepeatHeal ItemIndex.AutoCastEquipment ItemIndex.IncreaseHealing ItemIndex.JumpBoost ItemIndex.ExecuteLowHealthElite ItemIndex.EnergizedOnEquipmentUse ItemIndex.BarrierOnOverHeal ItemIndex.TitanGoldDuringTP ItemIndex.SprintWisp ItemIndex.BarrierOnKill EquipmentIndex.CommandMissile EquipmentIndex.Fruit EquipmentIndex.Meteor EquipmentIndex.Blackhole EquipmentIndex.CritOnUse EquipmentIndex.DroneBackup EquipmentIndex.BFG EquipmentIndex.Jetpack EquipmentIndex.Lightning EquipmentIndex.GoldGat EquipmentIndex.PassiveHealing EquipmentIndex.BurnNearby EquipmentIndex.Scanner EquipmentIndex.CrippleWard EquipmentIndex.Gateway EquipmentIndex.Tonic EquipmentIndex.QuestVolatileBattery LunarCoin.Coin0");
+                stats.append("<unlock>Characters.Engineer</unlock><unlock>Characters.Huntress</unlock><unlock>Characters.Loader</unlock><unlock>Characters.Mage</unlock><unlock>Characters.Mercenary</unlock><unlock>Characters.Toolbot</unlock><unlock>Characters.Treebot</unlock><unlock>Items.AttackSpeedOnCrit</unlock><unlock>Items.AutoCastEquipment</unlock><unlock>Items.BFG</unlock><unlock>Items.Bear</unlock><unlock>Items.BossDamageBonus</unlock><unlock>Items.BounceNearby</unlock><unlock>Items.BurnNearby</unlock><unlock>Items.Cleanse</unlock><unlock>Items.Clover</unlock><unlock>Items.Crowbar</unlock><unlock>Items.DroneBackup</unlock><unlock>Items.ElementalRings</unlock><unlock>Items.EnergizedOnEquipmentUse</unlock><unlock>Items.EquipmentMagazine</unlock><unlock>Items.ExecuteLowHealthElite</unlock><unlock>Items.ExtraLife</unlock><unlock>Items.Firework</unlock><unlock>Items.Gateway</unlock><unlock>Items.GoldGat</unlock><unlock>Items.HealOnCrit</unlock><unlock>Items.Hoof</unlock><unlock>Items.IncreaseHealing</unlock><unlock>Items.Infusion</unlock><unlock>Items.JumpBoost</unlock><unlock>Items.KillEliteFrenzy</unlock><unlock>Items.Lightning</unlock><unlock>Items.LunarUtilityReplacement</unlock><unlock>Items.Medkit</unlock><unlock>Items.Meteor</unlock><unlock>Items.NovaOnHeal</unlock><unlock>Items.PassiveHealing</unlock><unlock>Items.RepeatHeal</unlock><unlock>Items.Scanner</unlock><unlock>Items.SecondarySkillMagazine</unlock><unlock>Items.ShockNearby</unlock><unlock>Items.Talisman</unlock><unlock>Items.Tonic</unlock><unlock>Items.TreasureCache</unlock><unlock>Items.WarCryOnMultiKill</unlock><unlock>Logs.BeetleBody.0</unlock><unlock>Logs.BeetleGuardBody.0</unlock><unlock>Logs.BeetleQueenBody.0</unlock><unlock>Logs.BellBody.0</unlock><unlock>Logs.BisonBody.0</unlock><unlock>Logs.ClayBody.0</unlock><unlock>Logs.ClayBossBody.0</unlock><unlock>Logs.ClayBruiserBody.0</unlock><unlock>Logs.ElectricWormBody.0</unlock><unlock>Logs.GolemBody.0</unlock><unlock>Logs.GravekeeperBody.0</unlock><unlock>Logs.GreaterWispBody.0</unlock><unlock>Logs.HermitCrabBody.0</unlock><unlock>Logs.ImpBody.0</unlock><unlock>Logs.ImpBossBody.0</unlock><unlock>Logs.JellyfishBody.0</unlock><unlock>Logs.LemurianBody.0</unlock><unlock>Logs.LemurianBruiserBody.0</unlock><unlock>Logs.MagmaWormBody.0</unlock><unlock>Logs.RoboBallBossBody.0</unlock><unlock>Logs.RoboBallMiniBody.0</unlock><unlock>Logs.SuperRoboBallBossBody.0</unlock><unlock>Logs.TitanBody.0</unlock><unlock>Logs.TitanGoldBody.0</unlock><unlock>Logs.VagrantBody.0</unlock><unlock>Logs.VultureBody.0</unlock><unlock>Logs.WispBody.0</unlock><unlock>Logs.Stages.bazaar</unlock><unlock>Logs.Stages.blackbeach</unlock><unlock>Logs.Stages.dampcavesimple</unlock><unlock>Logs.Stages.foggyswamp</unlock><unlock>Logs.Stages.frozenwall</unlock><unlock>Logs.Stages.goldshores</unlock><unlock>Logs.Stages.golemplains</unlock><unlock>Logs.Stages.goolake</unlock><unlock>Logs.Stages.mysteryspace</unlock><unlock>Logs.Stages.shipgraveyard</unlock><unlock>Logs.Stages.wispgraveyard</unlock><unlock>Skills.Commando.FireShotgunBlast</unlock><unlock>Skills.Commando.ThrowGrenade</unlock><unlock>Skills.Engi.SpiderMine</unlock><unlock>Skills.Engi.WalkerTurret</unlock><unlock>Skills.Huntress.MiniBlink</unlock><unlock>Skills.Huntress.Snipe</unlock><unlock>Skills.Loader.YankHook</unlock><unlock>Skills.Mage.FlyUp</unlock><unlock>Skills.Mage.IceBomb</unlock><unlock>Skills.Mage.LightningBolt</unlock><unlock>Skills.Merc.EvisProjectile</unlock><unlock>Skills.Merc.Uppercut</unlock><unlock>Skills.Toolbot.Buzzsaw</unlock><unlock>Skills.Toolbot.Grenade</unlock><unlock>Skills.Treebot.Barrage</unlock><unlock>Skins.Commando.Alt1</unlock><unlock>Skins.Huntress.Alt1</unlock><unlock>Skins.Loader.Alt1</unlock><unlock>Skins.Mage.Alt1</unlock><unlock>Skins.Merc.Alt1</unlock><unlock>Skins.Toolbot.Alt1</unlock><unlock>Skins.Treebot.Alt1</unlock>");
+
+                main_textarea.val(new XMLSerializer().serializeToString(xml[0]));
+
+                button_unlock.addClass("hidden");
+                change_status("FINISHED");
+            });
+
+            button_save.on("click", function(e) {
+                e.preventDefault();
+                let blob = new Blob([main_textarea.val()], {"type" : "text/plain"});
+                let a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = "new_save.xml";
+                document.body.append(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blob);
+            });
+            save_anchor.on("click", function(e){e.preventDefault();console.log("work you fuck")});
+
+            main_textarea.change();
+        });
+    </script>
 </head>
 <body>
-    <div id="title">Risk of Rain 2 Save Editor</div>
-    <div>Worked on this for a few hours. I've got some ideas for it, so there will be updates.<br>For now, this just unlocks everything. Paste in your save file, then submit and copy the new version back into the file.</div>
-    <div>Credit for the unlocks here; <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1704500228">https://steamcommunity.com/sharedfiles/filedetails/?id=1704500228</a></div>
-    <br>
-    <div id="content-area">
-        <div><b>Old Save</b></div>
-        <textarea id="old-save" rows="10" cols="50"></textarea>
-        <button onclick="submit()">Submit</button>
-
-        <div><b>New Save</b></div>
-        <textarea id="new-save" rows="10" cols="50" readonly></textarea>
-        <button onclick="clearText('new-save')">Clear</button>
-        <button onclick="copy()">Copy</button>
+    <div class="background" id="fs-static"></div>
+    <div class="background" id="sphere-bg"></div>
+    <div class="background" id="embers-bg" style="transform:scaleX(-1);"></div>
+    <div class="background" id="embers-bg"></div>
+    <div class="noselect header">Risk of Rain 2<div class="noselect header2">Save Editor</div></div>
+    <div class="main-textarea-wrapper">
+        <textarea id="main-textarea" spellcheck="false" placeholder="Paste your save code, or upload a file." autofocus></textarea>
     </div>
-
-    <script>
-        let x = $("#old-save");
-        let y = $("#new-save")
-
-        function submit() {
-            let $xml = $($.parseXML(x.val()));
-
-            $xml.find("achievementsList").text("AttackSpeed BurnToDeath CarryLunarItems ChargeTeleporterWhileNearDeath CommandoClearGameMonsoon CommandoKillOverloadingWorm CommandoNonLunarEndurance Complete20Stages Complete30StagesCareer CompleteMultiBossShrine CompletePrismaticTrial CompleteTeleporter CompleteTeleporterWithoutInjury CompleteThreeStages CompleteThreeStagesWithoutHealing CompleteUnknownEnding DefeatSuperRoboBallBoss Die5Times Discover10UniqueTier1 Discover5Equipment EngiArmy EngiKillBossQuick FailShrineChance FindDevilAltar FindTimedChest FindUniqueNewtStatues FreeMage HardEliteBossKill HardHitter HuntressClearGameMonsoon HuntressCollectCrowbars HuntressMaintainFullHealthOnFrozenWall KillBossQuantityInRun KillBossQuick KillElementalLemurians KillEliteMonster KillElitesMilestone KillGoldTitanInOneCycle KillTotalEnemies LoaderClearGameMonsoon LoaderSpeedRun LogCollector LoopOnce MageAirborneMultiKill MageClearGameMonsoon MageFastBoss MageMultiKill MajorMultikill MaxHealingShrine MercClearGameMonsoon MercCompleteTrialWithFullHealth MercDontTouchGround MoveSpeed MultiCombatShrine RepeatFirstTeleporter RepeatedlyDuplicateItems RescueTreebot StayAlive1 SuicideHermitCrabs ToolbotClearGameMonsoon ToolbotGuardTeleporter ToolbotKillImpBossWithBfg TotalDronesRepaired TotalMoneyCollected TreebotClearGameMonsoon TreebotDunkClayBoss TreebotLowHealthTeleporter UseThreePortals");
-
-            $xml.find("discoveredPickups").text("ItemIndex.Syringe ItemIndex.Bear ItemIndex.Behemoth ItemIndex.Missile ItemIndex.ExplodeOnDeath ItemIndex.Dagger ItemIndex.Tooth ItemIndex.CritGlasses ItemIndex.Hoof ItemIndex.Feather ItemIndex.ChainLightning ItemIndex.Seed ItemIndex.Icicle ItemIndex.GhostOnKill ItemIndex.Mushroom ItemIndex.Crowbar ItemIndex.AttackSpeedOnCrit ItemIndex.BleedOnHit ItemIndex.SprintOutOfCombat ItemIndex.FallBoots ItemIndex.WardOnLevel ItemIndex.Phasing ItemIndex.HealOnCrit ItemIndex.HealWhileSafe ItemIndex.PersonalShield ItemIndex.EquipmentMagazine ItemIndex.NovaOnHeal ItemIndex.ShockNearby ItemIndex.Infusion ItemIndex.Clover ItemIndex.Medkit ItemIndex.Bandolier ItemIndex.BounceNearby ItemIndex.IgniteOnKill ItemIndex.StunChanceOnHit ItemIndex.Firework ItemIndex.LunarDagger ItemIndex.GoldOnHit ItemIndex.WarCryOnMultiKill ItemIndex.ShieldOnly ItemIndex.AlienHead ItemIndex.Talisman ItemIndex.Knurl ItemIndex.BeetleGland ItemIndex.SprintBonus ItemIndex.SecondarySkillMagazine ItemIndex.StickyBomb ItemIndex.TreasureCache ItemIndex.BossDamageBonus ItemIndex.SprintArmor ItemIndex.IceRing ItemIndex.FireRing ItemIndex.SlowOnHit ItemIndex.ExtraLife ItemIndex.UtilitySkillMagazine ItemIndex.HeadHunter ItemIndex.KillEliteFrenzy ItemIndex.RepeatHeal ItemIndex.AutoCastEquipment ItemIndex.IncreaseHealing ItemIndex.JumpBoost ItemIndex.ExecuteLowHealthElite ItemIndex.EnergizedOnEquipmentUse ItemIndex.BarrierOnOverHeal ItemIndex.TitanGoldDuringTP ItemIndex.SprintWisp ItemIndex.BarrierOnKill EquipmentIndex.CommandMissile EquipmentIndex.Fruit EquipmentIndex.Meteor EquipmentIndex.Blackhole EquipmentIndex.CritOnUse EquipmentIndex.DroneBackup EquipmentIndex.BFG EquipmentIndex.Jetpack EquipmentIndex.Lightning EquipmentIndex.GoldGat EquipmentIndex.PassiveHealing EquipmentIndex.BurnNearby EquipmentIndex.Scanner EquipmentIndex.CrippleWard EquipmentIndex.Gateway EquipmentIndex.Tonic EquipmentIndex.QuestVolatileBattery LunarCoin.Coin0");
-
-            let unlocks = $xml.find("unlock");
-            unlocks.each(function(){ $(this).remove(); });
-
-            let stats = $xml.find("stats");
-            stats.append("<unlock>Characters.Engineer</unlock><unlock>Characters.Huntress</unlock><unlock>Characters.Loader</unlock><unlock>Characters.Mage</unlock><unlock>Characters.Mercenary</unlock><unlock>Characters.Toolbot</unlock><unlock>Characters.Treebot</unlock><unlock>Items.AttackSpeedOnCrit</unlock><unlock>Items.AutoCastEquipment</unlock><unlock>Items.BFG</unlock><unlock>Items.Bear</unlock><unlock>Items.BossDamageBonus</unlock><unlock>Items.BounceNearby</unlock><unlock>Items.BurnNearby</unlock><unlock>Items.Cleanse</unlock><unlock>Items.Clover</unlock><unlock>Items.Crowbar</unlock><unlock>Items.DroneBackup</unlock><unlock>Items.ElementalRings</unlock><unlock>Items.EnergizedOnEquipmentUse</unlock><unlock>Items.EquipmentMagazine</unlock><unlock>Items.ExecuteLowHealthElite</unlock><unlock>Items.ExtraLife</unlock><unlock>Items.Firework</unlock><unlock>Items.Gateway</unlock><unlock>Items.GoldGat</unlock><unlock>Items.HealOnCrit</unlock><unlock>Items.Hoof</unlock><unlock>Items.IncreaseHealing</unlock><unlock>Items.Infusion</unlock><unlock>Items.JumpBoost</unlock><unlock>Items.KillEliteFrenzy</unlock><unlock>Items.Lightning</unlock><unlock>Items.LunarUtilityReplacement</unlock><unlock>Items.Medkit</unlock><unlock>Items.Meteor</unlock><unlock>Items.NovaOnHeal</unlock><unlock>Items.PassiveHealing</unlock><unlock>Items.RepeatHeal</unlock><unlock>Items.Scanner</unlock><unlock>Items.SecondarySkillMagazine</unlock><unlock>Items.ShockNearby</unlock><unlock>Items.Talisman</unlock><unlock>Items.Tonic</unlock><unlock>Items.TreasureCache</unlock><unlock>Items.WarCryOnMultiKill</unlock><unlock>Logs.BeetleBody.0</unlock><unlock>Logs.BeetleGuardBody.0</unlock><unlock>Logs.BeetleQueenBody.0</unlock><unlock>Logs.BellBody.0</unlock><unlock>Logs.BisonBody.0</unlock><unlock>Logs.ClayBody.0</unlock><unlock>Logs.ClayBossBody.0</unlock><unlock>Logs.ClayBruiserBody.0</unlock><unlock>Logs.ElectricWormBody.0</unlock><unlock>Logs.GolemBody.0</unlock><unlock>Logs.GravekeeperBody.0</unlock><unlock>Logs.GreaterWispBody.0</unlock><unlock>Logs.HermitCrabBody.0</unlock><unlock>Logs.ImpBody.0</unlock><unlock>Logs.ImpBossBody.0</unlock><unlock>Logs.JellyfishBody.0</unlock><unlock>Logs.LemurianBody.0</unlock><unlock>Logs.LemurianBruiserBody.0</unlock><unlock>Logs.MagmaWormBody.0</unlock><unlock>Logs.RoboBallBossBody.0</unlock><unlock>Logs.RoboBallMiniBody.0</unlock><unlock>Logs.SuperRoboBallBossBody.0</unlock><unlock>Logs.TitanBody.0</unlock><unlock>Logs.TitanGoldBody.0</unlock><unlock>Logs.VagrantBody.0</unlock><unlock>Logs.VultureBody.0</unlock><unlock>Logs.WispBody.0</unlock><unlock>Logs.Stages.bazaar</unlock><unlock>Logs.Stages.blackbeach</unlock><unlock>Logs.Stages.dampcavesimple</unlock><unlock>Logs.Stages.foggyswamp</unlock><unlock>Logs.Stages.frozenwall</unlock><unlock>Logs.Stages.goldshores</unlock><unlock>Logs.Stages.golemplains</unlock><unlock>Logs.Stages.goolake</unlock><unlock>Logs.Stages.mysteryspace</unlock><unlock>Logs.Stages.shipgraveyard</unlock><unlock>Logs.Stages.wispgraveyard</unlock><unlock>Skills.Commando.FireShotgunBlast</unlock><unlock>Skills.Commando.ThrowGrenade</unlock><unlock>Skills.Engi.SpiderMine</unlock><unlock>Skills.Engi.WalkerTurret</unlock><unlock>Skills.Huntress.MiniBlink</unlock><unlock>Skills.Huntress.Snipe</unlock><unlock>Skills.Loader.YankHook</unlock><unlock>Skills.Mage.FlyUp</unlock><unlock>Skills.Mage.IceBomb</unlock><unlock>Skills.Mage.LightningBolt</unlock><unlock>Skills.Merc.EvisProjectile</unlock><unlock>Skills.Merc.Uppercut</unlock><unlock>Skills.Toolbot.Buzzsaw</unlock><unlock>Skills.Toolbot.Grenade</unlock><unlock>Skills.Treebot.Barrage</unlock><unlock>Skins.Commando.Alt1</unlock><unlock>Skins.Huntress.Alt1</unlock><unlock>Skins.Loader.Alt1</unlock><unlock>Skins.Mage.Alt1</unlock><unlock>Skins.Merc.Alt1</unlock><unlock>Skins.Toolbot.Alt1</unlock><unlock>Skins.Treebot.Alt1</unlock>");
-
-            y.val(new XMLSerializer().serializeToString($xml[0]));
-        }
-
-        function copy() {
-            y.select();
-        }    
-
-        function clearText(id) {
-            $("#"+id).val("");
-        }
-    </script>
+    <input id="input-upload" type="file" style="display:none;"/>
+    <!-- <a id="saveanchor" download="new_save.xml">click me</a> -->
+    <div class="button-container">
+        <button class="main-button" id="button-load">Load</button>
+        <button class="main-button hidden" id="button-clear"">Clear</button>
+        <button class="main-button hidden" id="button-unlock"">Add Unlocks</button>
+        <button class="main-button hidden" id="button-copy"">Copy</button>
+        <button class="main-button hidden" id="button-save"">Save</button>
+    </div>
+    <div class="noselect" style="position:absolute;right:0px;bottom:0px;margin:1em;color:rgba(255,248,231,0.5);">:)</div>
+    <div class="noselect" style="position:absolute;left:0px;bottom:0px;margin:1em;color:rgba(255,248,231,0.5);">(:</div>
+    <div class="footer">v0.1.0 - tbfts - <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1704500228" target="_blank">unlock credits</a> - this version only tested in firefox</div>
 </body>
-</html> 
+</html>
