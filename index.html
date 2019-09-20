@@ -62,11 +62,10 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 100%;
+            width: 90%;
             height: 33%;
             max-width: 720px;
             min-height: 250px;
-            padding: 1em;
             transform: translate(-50%,-50%);
         }
         .noselect {
@@ -75,9 +74,8 @@
 
         .button-container {
             position: absolute;
-            bottom: 10%;
-            left: 50%;
-            transform: translate(-50%,-50%);
+            right: 0px;
+            bottom: -41px;
             width: 100%;
             max-width: 250px;
             display: flex;
@@ -88,12 +86,12 @@
             flex: 0.5 100%;
             position: relative;
             padding: 0.75em 1em;
-            margin: 0px 0.5em 0px 0.5em;
             font-size: 14px;
 
             color: #ff6e0e;
             background-color: rgba(0,0,0,0.3);
             border: 1px solid #ff6e0e;
+            border-top: none;
             border-radius: 2px;
         }
         .hidden {
@@ -103,7 +101,7 @@
             position: absolute; 
             width: 100%;
             text-align: center;
-            padding-top: 3em;
+            padding-top: 0.5em;
             font-size: 30px;
         }
         .header2 {
@@ -123,6 +121,33 @@
         }
         a:link, a:visited, a:active { color: #ff6e0e; }
         a:hover { color: grey; }
+
+        .name-container, .coin-container {
+            display: flex; 
+            flex-direction: row;
+            width: 100%;
+        }
+        .name-title, .coin-title {
+            color: #ff6e0e;
+            margin-right: 0.5em;
+            width: 12%;
+            font-size: 14px;
+        }
+        .edit-warning {
+            color: grey;
+            font-size: 12px;
+        }
+        .small-textarea {
+            width: 50%;
+            outline: none;
+            border: none;
+            resize: none;
+            background-color: rgba(0,0,0,0.3);
+            color: #FFF8E7;
+            box-sizing: border-box;
+            height: 16px;
+            overflow: hidden;
+        }
     </style>
     <script>
         $(function(){
@@ -134,6 +159,9 @@
             let button_save = $("#button-save");
             let main_textarea = $("#main-textarea");
             let save_anchor = $("#saveanchor");
+            let name_text = $("#name-text");
+            let coin_text = $("#coin-text");
+            let xml = null;
 
             function hide_element(e) {
                 if (!e.hasClass("hidden")) {
@@ -148,6 +176,7 @@
             }
 
             function change_status(status) {
+                main_status = status;
                 if (status == "NONE") {
                     show_element(button_load);
                     hide_element(button_clear);
@@ -173,11 +202,29 @@
                 let text = $(this).val(); 
                 if (text.search("<UserProfile>") == -1) {
                     change_status("NONE");
+
+                    name_text.val("");
+                    coin_text.val("");
                 } else {
+                    xml = $($.parseXML(main_textarea.val()));
                     change_status("READY");
+
+                    name_text.val(xml.find("name").text());
+                    coin_text.val(xml.find("coins").text());
                 }
             });
 
+            coin_text.on("change keyup paste", function(){
+                if (main_status == "NONE") return;
+                xml.find("coins").text(coin_text.val());
+                main_textarea.val(new XMLSerializer().serializeToString(xml[0]));
+            })
+
+            name_text.on("change keyup paste", function(){
+                if (main_status == "NONE") return;
+                xml.find("name").text(name_text.val());
+                main_textarea.val(new XMLSerializer().serializeToString(xml[0]));
+            })
 
             button_clear.on("click", function(){
                 main_textarea.val("");
@@ -210,7 +257,6 @@
             });
 
             button_unlock.on("click", function(){
-                let xml = $($.parseXML(main_textarea.val()));
                 let stats = xml.find("stats");
                 let unlocks = xml.find("unlock");
                 unlocks.each(function(){ $(this).remove(); });
@@ -250,17 +296,20 @@
     <div class="noselect header">Risk of Rain 2<div class="noselect header2">Save Editor</div></div>
     <div class="main-textarea-wrapper">
         <textarea id="main-textarea" spellcheck="false" placeholder="Paste your save code, or upload a file." autofocus></textarea>
+        <div class="name-container"><div class="name-title noselect">Save Name : </div><textarea class="small-textarea" id="name-text" spellcheck="false" placeholder="Need a save to edit..."></textarea></div>
+        <div class="coin-container"><div class="coin-title noselect">Lunar Coins : </div><textarea class="small-textarea" id="coin-text"  spellcheck="false" placeholder="Need a save to edit..."></textarea></div>
+        <div class="edit-warning noselect">These will sync within the file, so edit with caution!</div>
+        <div class="button-container">
+            <button class="main-button" id="button-load">Load</button>
+            <button class="main-button hidden noselect" id="button-clear"">Clear</button>
+            <button class="main-button hidden noselect" id="button-unlock"">Add Unlocks</button>
+            <button class="main-button hidden noselect" id="button-copy"">Copy</button>
+            <button class="main-button hidden noselect" id="button-save"">Save</button>
+        </div>
     </div>
     <input id="input-upload" type="file" style="display:none;"/>
-    <div class="button-container">
-        <button class="main-button" id="button-load">Load</button>
-        <button class="main-button hidden noselect" id="button-clear"">Clear</button>
-        <button class="main-button hidden noselect" id="button-unlock"">Add Unlocks</button>
-        <button class="main-button hidden noselect" id="button-copy"">Copy</button>
-        <button class="main-button hidden noselect" id="button-save"">Save</button>
-    </div>
     <div class="noselect" style="position:absolute;right:0px;bottom:0px;margin:1em;color:rgba(255,248,231,0.5);">:)</div>
     <div class="noselect" style="position:absolute;left:0px;bottom:0px;margin:1em;color:rgba(255,248,231,0.5);">(:</div>
-    <div class="footer">v0.1.3 - <a href="https://github.com/tbfts/ror2_save_editor" target="_blank">tbfts</a> - <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1704500228" target="_blank">unlock credits</a> - <a href="https://sasj.tumblr.com/" target="_blank">background cubes</a> - <a href="https://www.fromsoftware.jp/" target="_blank">background static</a> - tested in firefox&chrome - send feedback in discord @Vels#7798</div>
+    <div class="footer">v0.2.0 - <a href="https://github.com/tbfts/ror2_save_editor" target="_blank">tbfts</a> - <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1704500228" target="_blank">unlock credits</a> - <a href="https://sasj.tumblr.com/" target="_blank">background cubes</a> - <a href="https://www.fromsoftware.jp/" target="_blank">background static</a> - tested in firefox&chrome - send feedback in discord @Vels#7798</div>
 </body>
 </html>
