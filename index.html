@@ -10,8 +10,10 @@
 <head>
     <meta charset="utf-8">
     <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP&display=swap" rel="stylesheet"> 
     <style>
         body {
+            font-family: 'Noto Sans JP', sans-serif;
             background-color: #151515;
             color: #FFF8E7;
             margin: 0px;
@@ -102,7 +104,7 @@
             width: 100%;
             text-align: center;
             padding-top: 3em;
-            font-size: 20px;
+            font-size: 30px;
         }
         .header2 {
             font-size: 14px;
@@ -117,6 +119,7 @@
             margin-bottom: 1em;
             bottom: 0px;
             color: rgba(255, 248, 231, 0.5);
+            font-size: 12px;
         }
         a:link, a:visited, a:active { color: #ff6e0e; }
         a:hover { color: grey; }
@@ -251,13 +254,13 @@
     <input id="input-upload" type="file" style="display:none;"/>
     <div class="button-container">
         <button class="main-button" id="button-load">Load</button>
-        <button class="main-button hidden" id="button-clear"">Clear</button>
-        <button class="main-button hidden" id="button-unlock"">Add Unlocks</button>
-        <button class="main-button hidden" id="button-copy"">Copy</button>
-        <button class="main-button hidden" id="button-save"">Save</button>
+        <button class="main-button hidden noselect" id="button-clear"">Clear</button>
+        <button class="main-button hidden noselect" id="button-unlock"">Add Unlocks</button>
+        <button class="main-button hidden noselect" id="button-copy"">Copy</button>
+        <button class="main-button hidden noselect" id="button-save"">Save</button>
     </div>
     <div class="noselect" style="position:absolute;right:0px;bottom:0px;margin:1em;color:rgba(255,248,231,0.5);">:)</div>
     <div class="noselect" style="position:absolute;left:0px;bottom:0px;margin:1em;color:rgba(255,248,231,0.5);">(:</div>
-    <div class="footer">v0.1.1 - <a href="https://github.com/tbfts/ror2_save_editor" target="_blank">tbfts</a> - <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1704500228" target="_blank">unlock credits</a> - this version only tested in firefox</div>
+    <div class="footer">v0.1.2 - <a href="https://github.com/tbfts/ror2_save_editor" target="_blank">tbfts</a> - <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1704500228" target="_blank">unlock credits</a> - <a href="https://sasj.tumblr.com/" target="_blank">background cubes</a> - <a href="https://www.fromsoftware.jp/" target="_blank">background static</a> - tested in firefox&chrome - discord @Vels#7798</div>
 </body>
 </html>
