@@ -1,0 +1,18 @@
+
+
+#inspector {
+	display: flex;
+	flex-flow: column;
+}
+
+.unlockSection {
+	margin-top: 10px;
+	display: flex;
+	flex-flow: column;
+}
+
+.unlockSection-list {
+	padding-left: 32px;
+	display: flex;
+	flex-flow: column;
+}

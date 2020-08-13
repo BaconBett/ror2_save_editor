@@ -4,4 +4,8 @@ const common = require('./webpack.common.js');
 module.exports = merge(common,
 {
 	mode: 'production',
+
+	output: {
+		publicPath: '/ror2_save_editor/',
+	}
 });
